@@ -1,6 +1,4 @@
-import os
 from datetime import datetime
-import matplotlib.pyplot as plt
 import numpy as np
 from keras.src.callbacks import TensorBoard
 from sklearn.model_selection import train_test_split
@@ -48,17 +46,17 @@ tensorboard_callback_1 = TensorBoard(log_dir=log_dir_1, histogram_freq=1)
 
 log_dir_2 = "logs/fit/" + datetime.now().strftime("%Y%m%d-%H%M%S") + "_model_2"
 tensorboard_callback_2 = TensorBoard(log_dir=log_dir_2, histogram_freq=1)
-if os.path.exists("model_1.h5"):
-    model_1 = load_model("model_1.h5")
-    print("Model 1 wczytany z pliku.")
-else:
+# if os.path.exists("model_1.h5"):
+#     model_1 = load_model("model_1.h5")
+#     print("Model 1 wczytany z pliku.")
+# else:
 # Model 1 z użyciem warstwy Input
-    model_1 = Sequential(name="Model_1")  # Zmiana nazwy na Model_1 (bez spacji)
-    model_1.add(Input(shape=(X_train.shape[1],), name="Input_Layer"))
-    model_1.add(Dense(64, activation='relu', kernel_initializer=HeNormal(), name="Hidden_Layer_1"))
-    model_1.add(Dense(32, activation='relu', kernel_initializer=HeNormal(), name="Hidden_Layer_2"))
-    model_1.add(Dense(3, activation='softmax', name="Output_Layer"))
-    model_1.save("model_1.h5")
+model_1 = Sequential(name="Model_1")  # Zmiana nazwy na Model_1 (bez spacji)
+model_1.add(Input(shape=(X_train.shape[1],), name="Input_Layer"))
+model_1.add(Dense(64, activation='relu', kernel_initializer=HeNormal(), name="Hidden_Layer_1"))
+model_1.add(Dense(32, activation='relu', kernel_initializer=HeNormal(), name="Hidden_Layer_2"))
+model_1.add(Dense(3, activation='softmax', name="Output_Layer"))
+model_1.save("model_1.h5")
 # Kompilacja Modelu 1
 model_1.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),
                 loss='categorical_crossentropy',
@@ -76,18 +74,18 @@ history_1 = model_1.fit(X_train, y_train,
                         validation_data=(X_test, y_test),
                         callbacks=[tensorboard_callback_1],
                         verbose=1)
-if os.path.exists("model_2.h5"):
-    model_2 = load_model("model_2.h5")
-    print("Model 2 wczytany z pliku.")
-else:
+# if os.path.exists("model_2.h5"):
+#     model_2 = load_model("model_2.h5")
+#     print("Model 2 wczytany z pliku.")
+# else:
 # Model 2 z użyciem crossentropy i softmax
-    model_2 = Sequential(name="Model_2")  # Zmiana nazwy na Model_2 (bez spacji)
-    model_2.add(Input(shape=(X_train.shape[1],), name="Input_Layer"))
-    model_2.add(Dense(128, activation='tanh', kernel_initializer=GlorotUniform(), name="Hidden_Layer_1"))
-    model_2.add(Dense(64, activation='tanh', kernel_initializer=GlorotUniform(), name="Hidden_Layer_2"))
-    model_2.add(Dense(32, activation='tanh', kernel_initializer=GlorotUniform(), name="Hidden_Layer_3"))
-    model_2.add(Dense(3, activation='softmax', name="Output_Layer"))
-    model_2.save("model_2.h5")
+model_2 = Sequential(name="Model_2")  # Zmiana nazwy na Model_2 (bez spacji)
+model_2.add(Input(shape=(X_train.shape[1],), name="Input_Layer"))
+model_2.add(Dense(128, activation='tanh', kernel_initializer=GlorotUniform(), name="Hidden_Layer_1"))
+model_2.add(Dense(64, activation='tanh', kernel_initializer=GlorotUniform(), name="Hidden_Layer_2"))
+model_2.add(Dense(32, activation='tanh', kernel_initializer=GlorotUniform(), name="Hidden_Layer_3"))
+model_2.add(Dense(3, activation='softmax', name="Output_Layer"))
+model_2.save("model_2.h5")
 # Kompilacja Modelu 2
 model_2.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),
                 loss='categorical_crossentropy',
