@@ -5,8 +5,9 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 import pandas as pd
 
-# 1. Wczytanie danych
-data_file_path = '/Users/adriangoik/Desktop/KNO_repo/Lab05/wine/wine.data'  # Zmień na właściwą ścieżkę pliku
+
+#wczytanie db
+data_file_path = '/Users/adriangoik/Desktop/KNO_repo/Lab05/wine/wine.data'
 column_names = [
     'Class', 'Alcohol', 'Malic_acid', 'Ash', 'Alcalinity_of_ash', 'Magnesium',
     'Total_phenols', 'Flavanoids', 'Nonflavanoid_phenols', 'Proanthocyanins',
@@ -14,8 +15,7 @@ column_names = [
 ]
 wine_data = pd.read_csv(data_file_path, header=None, names=column_names)
 
-# Podział na cechy i etykiety
-X = wine_data.drop(columns=['Class'])
+X = wine_data.drop(columns=['Class']) #podział na etykiety
 y = wine_data['Class'] - 1  # Etykiety zaczynają się od 0
 
 # Podział na zbiory treningowe i walidacyjne
@@ -26,7 +26,7 @@ scaler = StandardScaler()
 X_train = scaler.fit_transform(X_train)
 X_val = scaler.transform(X_val)
 
-# 2. Definicja modelu w postaci klasy Keras
+#Definicja modelu w postaci klasy Keras
 class CustomModel(Model):
     def __init__(self, num_units, dropout_rate):
         super(CustomModel, self).__init__()
@@ -39,7 +39,7 @@ class CustomModel(Model):
         x = self.dropout(x)
         return self.dense2(x)
 
-# 3. Funkcja budująca model (używana przez Keras Tuner)
+# Funkcja budująca model (używana przez Keras Tuner)
 def build_model(hp):
     num_units = hp.Int('num_units', min_value=32, max_value=512, step=32)
     dropout_rate = hp.Float('dropout_rate', min_value=0.1, max_value=0.5, step=0.1)
@@ -53,30 +53,30 @@ def build_model(hp):
     )
     return model
 
-# 4. Inicjalizacja RandomSearch
+# RandomSearch
 tuner = RandomSearch(
     build_model,
     objective='val_accuracy',
-    max_trials=20,
+    max_trials=1,
     executions_per_trial=2,
     directory='my_dir',
     project_name='wine_hyperparam_tuning'
 )
 
-# 5. Rozpoczęcie wyszukiwania z keras tuner
+#  Rozpoczęcie wyszukiwania z keras tuner
 tuner.search(X_train, y_train, validation_data=(X_val, y_val), epochs=20, batch_size=16)
 
-# 6. Pobranie najlepszego modelu i hiperparametrów
+# Pobranie najlepszego modelu i hiperparametrów
 best_hps = tuner.get_best_hyperparameters(num_trials=1)[0]
 
 print(f"Najlepsze hiperparametry: num_units={best_hps.get('num_units')}, "
       f"dropout_rate={best_hps.get('dropout_rate')}, "
       f"learning_rate={best_hps.get('learning_rate')}")
 
-# 7. Trening modelu z najlepszymi hiperparametrami
+#Trening modelu z najlepszymi hiperparametrami
 best_model = tuner.hypermodel.build(best_hps)
 history = best_model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=50, batch_size=16)
 
-# 8. Ewaluacja modelu
+#Ewaluacja modelu
 loss, accuracy = best_model.evaluate(X_val, y_val)
 print(f"Dokładność walidacyjna: {accuracy:.4f}")
