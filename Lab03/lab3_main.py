@@ -118,6 +118,9 @@ test_loss_2, test_acc_2 = model_2.evaluate(X_test, y_test, verbose=0)
 print(f"Model 2 - Test Accuracy: {test_acc_2:.4f}")
 
 best_model = model_1 if test_acc_1 > test_acc_2 else model_2
+# Zapisanie najlepszego modelu do pliku
+best_model.save('best_model.h5')
+print("Best model saved as 'best_model.h5'")
 
 # Funkcja predykcyjna dla użytkownika
 def predict_wine_category(features):
