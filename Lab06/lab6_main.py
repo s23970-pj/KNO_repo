@@ -7,49 +7,50 @@ import numpy as np
 # Załadowanie danych MNIST
 (train_images, train_labels), (test_images, test_labels) = mnist.load_data()
 
-# Normalizacja danych
+# Znormalizowane dane żeby poprawić wydajności uczenia
 train_images = train_images.astype('float32') / 255
-test_images = test_images.astype('float32') / 255
+test_images = test_images.astype('float32') / 255 # zmieniamy wartości pikseli z [0;255] do [0;1]
 
 # One-hot encoding dla etykiet
-train_labels = to_categorical(train_labels)
+train_labels = to_categorical(train_labels) # zmienia wart. liczbowe na wektory binarne
 test_labels = to_categorical(test_labels)
 
 '''Sieć warstwowa Fully connected dense layers dla porównania'''
 # Przekształcenie danych do wektora (flatten)
-train_images_flat = train_images.reshape((60000, 28 * 28))
+train_images_flat = train_images.reshape((60000, 28 * 28)) #28x28 w 1D wektory o dł.784
 test_images_flat = test_images.reshape((10000, 28 * 28))
 
 # Budowa modelu FCNN
 fcnn_model = models.Sequential()
-fcnn_model.add(layers.Dense(512, activation='relu', input_shape=(28 * 28,)))
-fcnn_model.add(layers.Dense(256, activation='relu'))
-fcnn_model.add(layers.Dense(10, activation='softmax'))
+fcnn_model.add(layers.Dense(512, activation='relu', input_shape=(28 * 28,))) #512 neuronów
+fcnn_model.add(layers.Dense(256, activation='relu'))#256 neuronów
+fcnn_model.add(layers.Dense(10, activation='softmax')) #10 neuronów po 1 dla każdej cyfry, Softmax dla klasyfikacji wieloklasowej
+
 
 # Kompilacja modelu FCNN
-fcnn_model.compile(optimizer='adam',
+fcnn_model.compile(optimizer='adam', #optymalizacja adam
                    loss='categorical_crossentropy',
                    metrics=['accuracy'])
 
 # Trenowanie modelu FCNN
-print("\nTrening modelu FCNN...\n")
+print("\nTrenowanie modelu FCNN\n")
 fcnn_model.fit(train_images_flat, train_labels, epochs=5, batch_size=64, validation_split=0.1)
 
 # Ewaluacja modelu FCNN
-fcnn_test_loss, fcnn_test_acc = fcnn_model.evaluate(test_images_flat, test_labels)
+fcnn_test_loss, fcnn_test_acc = fcnn_model.evaluate(test_images_flat, test_labels) #dokładność
 print(f'\nDokładność FCNN na zbiorze testowym: {fcnn_test_acc}')
 
-'''Sieć z zadania 6'''
+'''Sieć z zadania 1,2'''
 # Przekształcenie danych do formatu 28x28x1 (dla CNN)
-train_images_cnn = train_images.reshape((60000, 28, 28, 1))
+train_images_cnn = train_images.reshape((60000, 28, 28, 1)) # 1 na końcu def. kanał skali szarości
 test_images_cnn = test_images.reshape((10000, 28, 28, 1))
 
 # Budowa rozszerzonego modelu CNN
 cnn_model = models.Sequential()
 
 # Pierwsza warstwa konwolucyjna + pooling
-cnn_model.add(layers.Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 1)))
-cnn_model.add(layers.MaxPooling2D((2, 2)))
+cnn_model.add(layers.Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 1))) #warstwa 3x3 wykrywanie cech np. krawędzi
+cnn_model.add(layers.MaxPooling2D((2, 2))) #MaxPooling2d zmniejsza wymiary danych, redukuje złożoność obliczeń
 
 # Analiza po pierwszym bloku
 print("Po pierwszym bloku konwolucyjnym:")
@@ -65,14 +66,15 @@ cnn_model.summary()
 
 # Trzecia warstwa konwolucyjna (bez pooling)
 cnn_model.add(layers.Conv2D(128, (3, 3), activation='relu'))
-
+''' UWAGA KOMENTARZ for future self 32->64->128 ponieważ każda warstwa uczy się kolejnych wzorców
+np. 32 filtry proste cechy potem coraz więcej więcej filtrów = większa zdolność wykrywania wzorców'''
 # Analiza po trzeciej warstwie konwolucyjnej
 print("\nPo trzeciej warstwie konwolucyjnej:")
 cnn_model.summary()
 
 # Flatten i warstwa w pełni połączona
-cnn_model.add(layers.Flatten())
-cnn_model.add(layers.Dense(64, activation='relu'))
+cnn_model.add(layers.Flatten()) #spłaszczenie danych do wktora
+cnn_model.add(layers.Dense(64, activation='relu')) # warstwa w pełni połączona do klasyfikacji
 cnn_model.add(layers.Dense(10, activation='softmax'))
 
 # Finalne podsumowanie modelu
@@ -122,3 +124,14 @@ def predict_digit(image_path):
 
 # Wywołanie funkcji na obrazie (upewnij się, że plik istnieje)
 predict_digit('digit.png')
+
+'''
+Więcej bloków konwolucyjnych:
+
+    Zwiększa dokładność modelu (model uczy się więcej szczegółów).
+    Pozwala na lepsze ogólne wnioskowanie (lepsza wydajność na danych testowych).
+
+Ale uwaga:
+
+    Zbyt duża liczba warstw → overfitting.
+'''
