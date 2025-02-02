@@ -42,7 +42,7 @@ class CustomModel(Model):
 # Funkcja budująca model (używana przez Keras Tuner)
 def build_model(hp):
     num_units = hp.Int('num_units', min_value=32, max_value=512, step=32)
-    dropout_rate = hp.Float('dropout_rate', min_value=0.1, max_value=0.5, step=0.1)
+    dropout_rate = hp.Float('dropout_rate', min_value=0.1, max_value=0.3, step=0.1)
     learning_rate = hp.Choice('learning_rate', values=[1e-2, 1e-3, 1e-4])
 
     model = CustomModel(num_units=num_units, dropout_rate=dropout_rate)
