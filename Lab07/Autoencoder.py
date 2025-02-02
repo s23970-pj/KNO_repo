@@ -6,7 +6,7 @@ import matplotlib
 matplotlib.use('Agg')  # Użycie backendu 'Agg' dla zapisu obrazów
 
 # Ścieżka do katalogu z danymi
-DATA_DIR = "C:/Users/Adrian/Desktop/KNO_repo/Lab07/photos"
+DATA_DIR = "/Users/adriangoik/Desktop/KNO_repo/Lab07/photos"
 
 # Parametry obrazków
 IMG_SIZE = (128, 128)
@@ -26,13 +26,13 @@ dataset = dataset.map(lambda x: x / 255.0)  # Normalizacja obrazków
 augmentation = tf.keras.Sequential([
     layers.RandomFlip("horizontal"),
     layers.RandomRotation(0.1),
-    layers.RandomZoom(0.1),
+    layers.RandomZoom(0.1), #poszerzenie datasetu o poprzerabiane obrazy
 ])
 
-dataset = dataset.map(lambda x: (augmentation(x), x))
+dataset = dataset.map(lambda x: (augmentation(x), x)) #doac dane z augumentacji żeby rzeczywiście poszerzyło bazę
 
 # przestrzeń latentna - length of my sequences https://blog.keras.io/building-autoencoders-in-keras.html
-latent_dim = 2
+latent_dim = 2 #rozmiar skompresowanej reprezentacji. u mnie mały więc ciężej złapać jakieś konkrety
 
 # Encoder
 encoder = models.Sequential([
@@ -69,7 +69,7 @@ autoencoder.fit(dataset, epochs=50)
 
 # Generowanie obrazka z latent space (autoencoder bez transfer learning)
 latent_vector = np.array([[0.5, -0.5]])  # Losowe wartości w przestrzeni latentnej
-generated_image = decoder.predict(latent_vector)
+generated_image = decoder.predict(latent_vector) #latent vector przetransformowany do obrazu
 
 # Zapis obrazka wygenerowanego przez autoenkoder
 import matplotlib.pyplot as plt
@@ -81,12 +81,12 @@ plt.show()
 
 # Zadanie dodatkowe: Transfer Learning
 base_model = tf.keras.applications.MobileNetV2(input_shape=(128, 128, 3), include_top=False, weights='imagenet')
-base_model.trainable = False
+base_model.trainable = False #Zamrożenie wag mobileneta żeby zachować właściwości uczenia
 
 transfer_encoder = models.Sequential([
     base_model,
-    layers.GlobalAveragePooling2D(),
-    layers.Dense(latent_dim)
+    layers.GlobalAveragePooling2D(), #zmniejszenie przestrzeni do pojedynczego wektora
+    layers.Dense(latent_dim) #kompresja do przestrzeni 2D
 ])
 
 # Nowy autoenkoder z transfer learning
